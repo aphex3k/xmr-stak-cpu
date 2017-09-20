@@ -61,7 +61,7 @@ static inline __m128i sl_xor(__m128i tmp1)
 }
 
 template<uint8_t rcon>
-static inline void aes_genkey_sub(__m128i* xout0, __m128i* xout2)
+static inline void aes_genkey_sub(__m128i* xout0, __m128i* xout2) __attribute__((__target__("aes")))
 {
 	__m128i xout1 = _mm_aeskeygenassist_si128(*xout2, rcon);
 	xout1 = _mm_shuffle_epi32(xout1, 0xFF); // see PSHUFD, set all elems to 4th elem
@@ -125,7 +125,8 @@ static inline void aes_genkey(const __m128i* memory, __m128i* k0, __m128i* k1, _
 	*k9 = xout2;
 }
 
-static inline void aes_round(__m128i key, __m128i* x0, __m128i* x1, __m128i* x2, __m128i* x3, __m128i* x4, __m128i* x5, __m128i* x6, __m128i* x7)
+
+static inline void aes_round(__m128i key, __m128i* x0, __m128i* x1, __m128i* x2, __m128i* x3, __m128i* x4, __m128i* x5, __m128i* x6, __m128i* x7) __attribute__((__target__("aes")))
 {
 	*x0 = _mm_aesenc_si128(*x0, key);
 	*x1 = _mm_aesenc_si128(*x1, key);
@@ -289,7 +290,7 @@ void cn_implode_scratchpad(const __m128i* input, __m128i* output)
 }
 
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
+void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0) __attribute__((__target__("aes")))
 {
 	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
 
@@ -354,7 +355,7 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
+void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1) __attribute__((__target__("aes")))
 {
 	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
 	keccak((const uint8_t *)input+len, len, ctx1->hash_state, 200);
