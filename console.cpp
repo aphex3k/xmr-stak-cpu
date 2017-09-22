@@ -180,7 +180,9 @@ void printer::print_msg(verbosity verbose, const char* fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	vsnprintf(buf+bpos, sizeof(buf)-bpos, fmt, args);
+    if (fmt != NULL) {
+        vsnprintf(buf+bpos, sizeof(buf)-bpos, fmt, args);
+    }
 	va_end(args);
 	bpos = strlen(buf);
 
